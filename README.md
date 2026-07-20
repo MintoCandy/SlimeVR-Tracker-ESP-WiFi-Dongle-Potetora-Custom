@@ -6,6 +6,7 @@
 このファームウェアは、白猫（Xユーザー名：[@NekodaKohaku](https://x.com/NekodaKohaku)）様が公開されている「[SlimeVR-Tracker-ESP-WiFi-Dongle](https://github.com/NekodaKohaku/SlimeVR-Tracker-ESP-WiFi-Dongle)」をベースに、日本国内のBOOTHで販売されているVRトラッカー「[ぽてとら2(強化版)](https://potesuto.booth.pm/items/5945821)」向けにカスタムを行ったハードフォーク版です。
 
 動作確認はぽてとら2(強化版)で行っています。ぽてとら（無印）含むほかのラインナップでは確認していないため動作するかは不明です。
+使用した開発ボードはAmazonなどで販売されている「Freenove ESP32-S3 ESP32 S3 Board Lite」になります。
 
 基本的な使い方や環境構築などについては、本家様の説明文（当README下部）をご確認の上、ご自身の環境に合わせて調整してください。
 
@@ -30,7 +31,9 @@
 ---
 
 ### 🇬🇧 English
-This firmware is a customized hard fork of the "[SlimeVR-Tracker-ESP-WiFi-Dongle](https://github.com/NekodaKohaku/SlimeVR-Tracker-ESP-WiFi-Dongle)" originally published by Shironeko (X/Twitter: [@NekodaKohaku](https://x.com/NekodaKohaku)). It has been specifically modified for use with the VR tracker "[Potetora](https://booth.pm/ja)" sold on BOOTH in Japan.
+This firmware is a customized hard fork of the "[SlimeVR-Tracker-ESP-WiFi-Dongle](https://github.com/NekodaKohaku/SlimeVR-Tracker-ESP-WiFi-Dongle)" originally published by Shironeko (X/Twitter: [@NekodaKohaku](https://x.com/NekodaKohaku)). It has been specifically modified for use with the VR tracker "[Potetora 2 (Enhanced Version)](https://potesuto.booth.pm/items/5945821)" sold on BOOTH in Japan.
+
+Operation has been verified specifically with Potetora 2 (Enhanced Version). It has not been tested with other models, including the original Potetora (standard version), so compatibility with them is unknown.
 
 For basic usage and setup instructions, please refer to the original author's description at the bottom of this README and adjust according to your environment.
 
@@ -51,7 +54,6 @@ For basic usage and setup instructions, please refer to the original author's de
 *   **Dongle-to-Tracker Pairing Memory**
     *   Memorizes the binding between a successfully connected tracker and the virtual ID sent to the PC.
     *   Prevents tracker assignment (sensor numbering) mismatches during reboots or reconnections.
-
 ---
 
 （以下、本家様の説明文 / Original description follows below）
