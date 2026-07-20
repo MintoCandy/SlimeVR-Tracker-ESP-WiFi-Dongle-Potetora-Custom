@@ -1,7 +1,8 @@
-# SlimeVR ESP Tracker WiFi Dongle ぽてとらカスタムファーム
+# SlimeVR ESP Tracker WiFi Dongle ぽてとらカスタムファーム / Potetora Custom Firmware
 
-**2026年7月20日 追記**
+**2026年7月20日 追記 / Added on July 20, 2026**
 
+### 🇯🇵 日本語 (Japanese)
 このファームウェアは、白猫（Xユーザー名：[@NekodaKohaku](https://x.com/NekodaKohaku)）様が公開されている「[SlimeVR-Tracker-ESP-WiFi-Dongle](https://github.com/NekodaKohaku/SlimeVR-Tracker-ESP-WiFi-Dongle)」をベースに、日本国内のBOOTHで販売されているVRトラッカー「[ぽてとら](https://booth.pm/ja)」向けにカスタムを行ったハードフォーク版です。
 
 基本的な使い方や環境構築などについては、本家様の説明文（当README下部）をご確認の上、ご自身の環境に合わせて調整してください。
@@ -10,8 +11,7 @@
 > 素晴らしいオープンソースプロジェクトを公開してくださっている白猫様、ならびに各種ライブラリの開発者様方に心より感謝いたします。
 > （※本カスタムファームウェアの開発・改修にはAIアシスタント「Gemini3.1Pro」を使用しています）
 
-## 🛠️ 主なカスタム内容（変更点）
-
+#### 🛠️ 主なカスタム内容
 *   **拡張センサー（AUX）への対応**
     *   センサーIDから拡張センサーのデータを分離・抽出。
     *   PC側（SlimeVR Server）に対して、独立した別の仮想トラッカーとして自動登録させる処理を追加。
@@ -27,7 +27,32 @@
 
 ---
 
-（以下、本家様の説明文）
+### 🇬🇧 English
+This firmware is a customized hard fork of the "[SlimeVR-Tracker-ESP-WiFi-Dongle](https://github.com/NekodaKohaku/SlimeVR-Tracker-ESP-WiFi-Dongle)" originally published by Shironeko (X/Twitter: [@NekodaKohaku](https://x.com/NekodaKohaku)). It has been specifically modified for use with the VR tracker "[Potetora](https://booth.pm/ja)" sold on BOOTH in Japan.
+
+For basic usage and setup instructions, please refer to the original author's description at the bottom of this README and adjust according to your environment.
+
+> **Acknowledgements**
+> I would like to express my sincere gratitude to Shironeko for publishing such an excellent open-source project, as well as to the developers of the various libraries used.
+> (*Note: The AI assistant "Gemini" was used in the development and modification of this custom firmware.*)
+
+#### 🛠️ Key Customizations (Changelog)
+*   **Support for Auxiliary (Extended) Sensors**
+    *   Extracts auxiliary sensor data based on the Sensor ID.
+    *   Automatically registers the auxiliary sensor as an independent, virtual tracker on the PC side (SlimeVR Server).
+    *   Implements separation and spoofing of linked data (battery level, signal strength, MAC address, etc.) for both main and auxiliary sensors.
+*   **Forced Online Recovery for Unstable Connections**
+    *   Resolves an issue where a tracker is recognized as "Offline" by the server despite successfully sending data.
+    *   Added logic to forcefully restore the "Online" state as soon as incoming data is detected.
+*   **Support for 8MB Flash Development Boards**
+    *   Added build configurations for boards equipped with 8MB flash memory. Please refer to the commented-out sections in `platformio.ini` for details.
+*   **Dongle-to-Tracker Pairing Memory**
+    *   Memorizes the binding between a successfully connected tracker and the virtual ID sent to the PC.
+    *   Prevents tracker assignment (sensor numbering) mismatches during reboots or reconnections.
+
+---
+
+（以下、本家様の説明文 / Original description follows below）
 
 [日本語](#日本語) | [English](#english) | [中文](#中文)
 
