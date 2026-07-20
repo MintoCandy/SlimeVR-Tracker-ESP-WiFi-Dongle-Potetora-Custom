@@ -5,7 +5,7 @@
 ### 🇯🇵 日本語 (Japanese)
 このファームウェアは、白猫（Xユーザー名：[@NekodaKohaku](https://x.com/NekodaKohaku)）様が公開されている「[SlimeVR-Tracker-ESP-WiFi-Dongle](https://github.com/NekodaKohaku/SlimeVR-Tracker-ESP-WiFi-Dongle)」をベースに、日本国内のBOOTHで販売されているVRトラッカー「[ぽてとら2(強化版)](https://potesuto.booth.pm/items/5945821)」向けにカスタムを行ったハードフォーク版です。
 
-動作確認はぽてとら2(強化版)で行っています。ぽてとら（無印）などほかのラインナップでは確認していないため動作するかは不明です。
+動作確認はぽてとら2(強化版)で行っています。ぽてとら（無印）含むほかのラインナップでは確認していないため動作するかは不明です。
 
 基本的な使い方や環境構築などについては、本家様の説明文（当README下部）をご確認の上、ご自身の環境に合わせて調整してください。
 
