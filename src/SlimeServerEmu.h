@@ -41,6 +41,7 @@ private:
 
 	static constexpr uint16_t kPort = WifiDongleConfig::udpPort;
 	static constexpr size_t   kMaxTrackers = WifiDongleConfig::maxTrackers;
+	static constexpr uint8_t  MAX_SENSORS_PER_TRACKER = 4; //(メイン0 + 拡張1〜3)とりあえず4枠とする
 
 	static constexpr bool     kEnableHeartbeat    = WifiDongleConfig::officialHeartbeatEnabled;
 	static constexpr uint32_t kHeartbeatIntervalMs = WifiDongleConfig::officialHeartbeatIntervalMs;
@@ -68,7 +69,7 @@ private:
 		IPAddress ip;
 		uint16_t  port = 0;
 		uint32_t  lastHeartbeatMs = 0;
-		int16_t   accelFixed[2][3] = {{0, 0, 0}, {0, 0, 0}};   // 最新 accel,組 rotation 包時用
+		int16_t   accelFixed[MAX_SENSORS_PER_TRACKER][3] = {0}; // (0で初期化)
 		uint32_t  lastSeenMs = 0;              // 最後收到該顆任何封包的時間
 		bool      connected = false;           // 目前是否視為連線中
 	};

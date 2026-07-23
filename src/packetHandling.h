@@ -30,6 +30,7 @@ private:
     static constexpr size_t PACKETS_PER_REPORT = 4;
     static constexpr size_t HID_REPORT_SIZE = HID_PACKET_SIZE * PACKETS_PER_REPORT; // 64
     static constexpr size_t MAX_TRACKERS = 16;
+    static constexpr uint8_t MAX_SENSORS_PER_TRACKER = 4;
     static constexpr size_t FIFO_SIZE = 64;
     static constexpr size_t PRIORITY_FIFO_SIZE = 16;   // status/register 等高優先封包
 

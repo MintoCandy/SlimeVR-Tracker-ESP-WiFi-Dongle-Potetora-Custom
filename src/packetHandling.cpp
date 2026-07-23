@@ -38,18 +38,15 @@ void PacketHandling::updateRssiByMac(const uint8_t mac[6], int8_t rssi) {
 
 // ---- 官方相容 setter:拿到就更新對應欄位 ----
 void PacketHandling::setBattery(uint8_t trackerId, uint8_t pct, uint16_t mv) {
-    int idx = findTracker(trackerId);
-    if (idx < 0) return;
-    trackers[idx].batt = pct;
-    trackers[idx].battV = static_cast<uint8_t>((mv > 2450) ? (mv - 2450) / 10 : 0);
-    trackers[idx].hasBattData = true;
-
-    // 拡張センサーにもバッテリー状態を反映する
-    int extIdx = findTracker(trackerId + 128);
-    if (extIdx >= 0) {
-        trackers[extIdx].batt = trackers[idx].batt;
-        trackers[extIdx].battV = trackers[idx].battV;
-        trackers[extIdx].hasBattData = true;
+    // trackerId に属するすべての仮想IDを一括更新
+    for (uint8_t s = 0; s < MAX_SENSORS_PER_TRACKER; s++) {
+        uint8_t targetHidId = trackerId + (s * 16);
+        int idx = findTracker(targetHidId);
+        if (idx >= 0) {
+            trackers[idx].batt = pct;
+            trackers[idx].battV = static_cast<uint8_t>((mv > 2450) ? (mv - 2450) / 10 : 0);
+            trackers[idx].hasBattData = true;
+        }
     }
 }
 
@@ -94,30 +91,21 @@ void PacketHandling::pushStatus(uint8_t trackerId, uint8_t status) {
 }
 
 void PacketHandling::setTrackerOnline(uint8_t trackerId, bool online) {
-    int idx = findTracker(trackerId);
-    if (idx >= 0) {
-        if (trackers[idx].online != online) {
-            trackers[idx].online = online;
-            if (!online) {
-                pushStatus(trackerId, 0);
-                Serial.printf("[HID] tracker %u marked DISCONNECTED\n", trackerId);
-            } else {
-                pushStatus(trackerId, 1);
-                lastRegSentMs = 0;
-                Serial.printf("[HID] tracker %u back ONLINE\n", trackerId);
-            }
-        }
-    }
-
-    // 拡張センサー(仮想トラッカー)のオンライン状態も連動させる
-    int extIdx = findTracker(trackerId + 128);
-    if (extIdx >= 0) {
-        if (trackers[extIdx].online != online) {
-            trackers[extIdx].online = online;
-            if (!online) {
-                pushStatus(trackerId + 128, 0);
-            } else {
-                pushStatus(trackerId + 128, 1);
+    // trackerId に属するすべての仮想IDを一括更新
+    for (uint8_t s = 0; s < MAX_SENSORS_PER_TRACKER; s++) {
+        uint8_t targetHidId = trackerId + (s * 16);
+        int idx = findTracker(targetHidId);
+        if (idx >= 0) {
+            if (trackers[idx].online != online) {
+                trackers[idx].online = online;
+                if (!online) {
+                    pushStatus(targetHidId, 0);
+                    Serial.printf("[HID] tracker %u marked DISCONNECTED\n", targetHidId);
+                } else {
+                    pushStatus(targetHidId, 1);
+                    lastRegSentMs = 0;
+                    Serial.printf("[HID] tracker %u back ONLINE\n", targetHidId);
+                }
             }
         }
     }
@@ -189,8 +177,8 @@ void PacketHandling::insert(const uint8_t *payload) {
     uint8_t trackerId = payload[0] >> 4;
     uint8_t sensorId = payload[0] & 0x0F;
 
-    // 拡張センサー(sensorId > 0)の場合は、IDに128を足して「別の仮想トラッカー」として扱う
-    uint8_t hidId = (sensorId == 0) ? trackerId : (trackerId + 128);
+    // 16刻みで動的に仮想HID IDを生成 (sensor 0: ID+0, sensor 1: ID+16, sensor 2: ID+32...)
+    uint8_t hidId = trackerId + (sensorId * 16);
 
     int idx = findTracker(hidId);
 
@@ -201,7 +189,9 @@ void PacketHandling::insert(const uint8_t *payload) {
             if (mainIdx >= 0) {
                 uint8_t extMac[6];
                 memcpy(extMac, trackers[mainIdx].mac, 6);
-                extMac[5] ^= 0xFF; // MACアドレスの末尾を反転して別デバイス化
+
+                // 拡張センサーごとに被らないMACアドレスを作る
+                extMac[5] ^= (0xA0 + sensorId);
 
                 // 仮想トラッカーの登録
                 if (registerTracker(hidId, extMac)) {

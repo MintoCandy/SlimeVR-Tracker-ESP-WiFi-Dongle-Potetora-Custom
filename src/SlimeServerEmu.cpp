@@ -244,22 +244,23 @@ void SlimeServerEmu::sendHeartbeat(Peer &p) {
 void SlimeServerEmu::handleAccel(Peer &p, const uint8_t *data, size_t len) {
 	if (len < 25) return;
 
-	// 24バイト目からセンサーIDを取得 (0: メイン, 1: 拡張)
-    uint8_t sensorId = data[24]; 
-    if (sensorId >= 2) return; // 念のための安全対策 (2以上の未知のIDは無視
+	uint8_t sensorId = data[24]; 
+	// MAX_SENSORS_PER_TRACKER 以上の場合は配列外参照防止のため弾く
+	if (sensorId >= MAX_SENSORS_PER_TRACKER) return; 
 
-	// sensorId に応じた配列に加速度データを保存する
+	// sensorId の位置へ動的に加速度を保存
 	p.accelFixed[sensorId][0] = toFixed<7>(readBeFloat(&data[12]));
-    p.accelFixed[sensorId][1] = toFixed<7>(readBeFloat(&data[16]));
-    p.accelFixed[sensorId][2] = toFixed<7>(readBeFloat(&data[20]));
+	p.accelFixed[sensorId][1] = toFixed<7>(readBeFloat(&data[16]));
+	p.accelFixed[sensorId][2] = toFixed<7>(readBeFloat(&data[20]));
 }
 
 // ---- RotationData(17):[12]sensorId [13]dataType [14..29]quat xyzw(f32 BE) [30]acc ----
 void SlimeServerEmu::handleRotation(Peer &p, const uint8_t *data, size_t len) {
     if (len < 31) return;
     uint8_t sensorId = data[12] & 0x0F;
-    // 念のため、予期せぬIDが来た場合はメイン(0)として扱う
-    uint8_t safeSensorId = (sensorId < 2) ? sensorId : 0; 
+
+    // 定義した最大センサー数以上の ID が来た場合は破棄
+    if (sensorId >= MAX_SENSORS_PER_TRACKER) return;
 
     int16_t qxF = toFixed<15>(readBeFloat(&data[14]));
     int16_t qyF = toFixed<15>(readBeFloat(&data[18]));
@@ -267,16 +268,17 @@ void SlimeServerEmu::handleRotation(Peer &p, const uint8_t *data, size_t len) {
     int16_t qwF = toFixed<15>(readBeFloat(&data[26]));
 
     uint8_t payload[15];
+    // パケット先頭に (物理トラッカーID << 4 | センサーID) をセット
     payload[0] = static_cast<uint8_t>((p.trackerId << 4) | sensorId);
     memcpy(&payload[1], &qxF, 2);
     memcpy(&payload[3], &qyF, 2);
     memcpy(&payload[5], &qzF, 2);
     memcpy(&payload[7], &qwF, 2);
     
-    // safeSensorId を使って、対応するセンサーの加速度データを取り出してパケットに結合
-    memcpy(&payload[9],  &p.accelFixed[safeSensorId][0], 2);
-    memcpy(&payload[11], &p.accelFixed[safeSensorId][1], 2);
-    memcpy(&payload[13], &p.accelFixed[safeSensorId][2], 2);
+    // sensorId の加速度バッファから直接取り出す
+    memcpy(&payload[9],  &p.accelFixed[sensorId][0], 2);
+    memcpy(&payload[11], &p.accelFixed[sensorId][1], 2);
+    memcpy(&payload[13], &p.accelFixed[sensorId][2], 2);
 
     PacketHandling::getInstance().insert(payload);
 }
