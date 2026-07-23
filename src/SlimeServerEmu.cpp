@@ -244,6 +244,7 @@ void SlimeServerEmu::sendHeartbeat(Peer &p) {
 void SlimeServerEmu::handleAccel(Peer &p, const uint8_t *data, size_t len) {
 	if (len < 25) return;
 
+	// 24バイト目からセンサーIDを取得 
 	uint8_t sensorId = data[24]; 
 	// MAX_SENSORS_PER_TRACKER 以上の場合は配列外参照防止のため弾く
 	if (sensorId >= MAX_SENSORS_PER_TRACKER) return; 
@@ -296,16 +297,20 @@ void SlimeServerEmu::handleBattery(Peer &p, const uint8_t *data, size_t len) {
 
 // ---- Temperature(20):body@12 = sensorId(1), temp(f32 BE). len=17 ----
 void SlimeServerEmu::handleTemperature(Peer &p, const uint8_t *data, size_t len) {
-	if (len < 17) return;
-	
-	// 12バイト目からセンサーIDを取得する
-	uint8_t sensorId = data[12]; 
-	float tempC = readBeFloat(&data[13]);
-	
-	// 拡張センサー(1)の場合は仮想ID(+128)へ紐づける
-	uint8_t hidId = (sensorId == 0) ? p.trackerId : (p.trackerId + 128);
-	
-	PacketHandling::getInstance().setTemp(hidId, encodeTemp(tempC));
+    if (len < 17) return;
+    
+    // 12バイト目からセンサーIDを取得する
+    uint8_t sensorId = data[12]; 
+
+    // 最大センサー数以上のIDが来た場合は弾く（安全対策）
+    if (sensorId >= MAX_SENSORS_PER_TRACKER) return;
+
+    float tempC = readBeFloat(&data[13]);
+    
+    // 16刻みの動的HID ID計算 (sensor 0: ID+0, sensor 1: ID+16, sensor 2: ID+32...)
+    uint8_t hidId = p.trackerId + (sensorId * 16);
+    
+    PacketHandling::getInstance().setTemp(hidId, encodeTemp(tempC));
 }
 
 // ---- SignalStrength(19):body@12 = sensorId(1), strength(int8). len=14 ----
@@ -316,28 +321,30 @@ void SlimeServerEmu::handleSignal(Peer &p, const uint8_t *data, size_t len) {
 	
 	// メインに電波強度をセットする
 	PacketHandling::getInstance().setRssi(p.trackerId, rssi);
-	// 拡張センサー側には無線通信機能がないため、データを送らないのでコメントアウト
-	//PacketHandling::getInstance().setRssi(p.trackerId + 128, rssi);
 }
 
 void SlimeServerEmu::handleSensorInfo(Peer &p, const uint8_t *data, size_t len) {
-	if (len < 15) return;
-	
-	// 12バイト目からセンサーIDとステータスを取得する
-	uint8_t sensorId = data[12];
-	uint8_t sensorStatus = data[13];
-	uint8_t imuId = data[14];
+    if (len < 15) return;
+    
+    // 12バイト目からセンサーIDとステータスを取得する
+    uint8_t sensorId = data[12];
 
-	// 拡張センサー(1)の場合は、+128して仮想トラッカーID（hidId）に紐づける
-	uint8_t hidId = (sensorId == 0) ? p.trackerId : (p.trackerId + 128);
-	
-	// 割り出した正しいID（hidId）でPC側へ通知する
-	PacketHandling::getInstance().setSensorInfo(hidId, imuId, 0);
+    // 最大センサー数以上のIDが来た場合は弾く（配列外参照・不正データ対策）
+    if (sensorId >= MAX_SENSORS_PER_TRACKER) return;
 
-	// もし物理的に本当に通信エラー(statusが正常を示す1以外)が起きている場合はログを出す
-	if (sensorStatus != 1) {
-		Serial.printf("[Emu] Tracker %d Sensor %d reported STATUS ERROR: %d\n", p.trackerId, sensorId, sensorStatus);
-	}
+    uint8_t sensorStatus = data[13];
+    uint8_t imuId = data[14];
+
+    // 16刻みの動的HID ID計算 (sensor 0: ID+0, sensor 1: ID+16, sensor 2: ID+32...)
+    uint8_t hidId = p.trackerId + (sensorId * 16);
+    
+    // 割り出した正しいID（hidId）でPC側へ通知する
+    PacketHandling::getInstance().setSensorInfo(hidId, imuId, 0);
+
+    // もし物理的に本当に通信エラー(statusが正常を示す1以外)が起きている場合はログを出す
+    if (sensorStatus != 1) {
+        Serial.printf("[Emu] Tracker %d Sensor %d reported STATUS ERROR: %d\n", p.trackerId, sensorId, sensorStatus);
+    }
 }
 
 void SlimeServerEmu::onPacket(AsyncUDPPacket &pkt) {
