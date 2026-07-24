@@ -432,8 +432,8 @@ void SlimeServerEmu::update() {
 			p.lastHeartbeatMs = now;
 			sendHeartbeat(p);
 		}
-
-		if (p.connected && (now - p.lastSeenMs >= kTrackerTimeoutMs)) {
+		//timeoutのアンダーフロー防止のため変更
+		if (p.connected && (now >= p.lastSeenMs) && (now - p.lastSeenMs >= kTrackerTimeoutMs)) {
 			p.connected = false;
 			Serial.printf("[Emu] tracker id=%u timed out -> disconnected\n", p.trackerId);
 			PacketHandling::getInstance().setTrackerOnline(p.trackerId, false);

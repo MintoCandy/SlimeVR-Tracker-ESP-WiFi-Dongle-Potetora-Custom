@@ -225,12 +225,6 @@ void PacketHandling::insert(const uint8_t *payload) {
         }
     }
 
-    if (idx >= 0 && !trackers[idx].online) {
-        trackers[idx].online = true;
-        pushStatus(hidId, 1); // PC側にオンラインを再通知
-        Serial.printf("Tracker %d back FORCE ONLINE\n", hidId); // デバッグ用ログ
-    }
-
     Packet p;
     memset(p.data, 0, HID_PACKET_SIZE);
     p.data[0] = 1;

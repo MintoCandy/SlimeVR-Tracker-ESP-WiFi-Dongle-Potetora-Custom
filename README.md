@@ -1,6 +1,6 @@
 # SlimeVR ESP Tracker WiFi Dongle ぽてとらカスタムファーム / Potetora Custom Firmware
 
-**2026年7月20日 追記 / Added on July 20, 2026**
+**2026年7月24日 追記 / Added on July 24, 2026**
 
 ### 🇯🇵 日本語 (Japanese)
 このファームウェアは、白猫（Xユーザー名：[@NekodaKohaku](https://x.com/NekodaKohaku)）様が公開されている「[SlimeVR-Tracker-ESP-WiFi-Dongle](https://github.com/NekodaKohaku/SlimeVR-Tracker-ESP-WiFi-Dongle)」をベースに、日本国内のBOOTHで販売されているVRトラッカー「[ぽてとら2(強化版)](https://potesuto.booth.pm/items/5945821)」向けにカスタムを行ったハードフォーク版です。
@@ -19,11 +19,20 @@
     *   センサーIDから拡張センサーのデータを分離・抽出。
     *   PC側（SlimeVR Server）に対して、独立した別の仮想トラッカーとして自動登録させる処理を追加。
     *   メインセンサーと拡張センサーの連動データ（バッテリー、通信状態など）の同期およびID/MACアドレスの偽装処理を実装。
-*   **通信不安定時のオンライン復帰機能**
-    *   トラッカーからデータが正常に送られてきているにもかかわらず、サーバー側で「オフライン」と判定されてしまう症状を改善。
-    *   データの受信が確認できた時点で、強制的にオンライン状態へ復帰させるロジックを追加。
+
+*   ~~通信不安定時のオンライン復帰機能~~
+    ~~* トラッカーからデータが正常に送られてきているにもかかわらず、サーバー側で「オフライン」と判定されてしまう症状を改善。~~
+    ~~* データの受信が確認できた時点で、強制的にオンライン状態へ復帰させるロジックを追加。~~
+
+*   **通信の安定性向上と誤切断バグの修正**
+
+    * 上記の「強制復帰ロジック」は、切断と復帰を繰り返す現象を誘発する要因となっていたため削除しました。
+
+    * ESP32のマルチコア（非同期処理）によるレースコンディションが原因で、パケット受信時刻と判定時刻が競合して「時間のアンダーフロー（巻き戻り）」が発 生し、超巨大な経過時間として誤検知されて強制切断されるバグを特定・修正しました。
+
 *   **フラッシュメモリ 8MB 開発ボードへの対応**
     *   8MBのフラッシュを搭載したボードで書き込むための設定を追加。詳細は `platformio.ini` 内のコメントアウトをご参照ください。
+
 *   **ドングルとトラッカーのペアリング記憶機能**
     *   一度接続を確立したトラッカーと、PC側に送信する仮想IDの紐付けを記憶。
     *   再起動時や再接続時にトラッカーの割り当て（センサー番号）がズレてしまう問題を防止。
@@ -46,9 +55,15 @@ For basic usage and setup instructions, please refer to the original author's de
     *   Extracts auxiliary sensor data based on the Sensor ID.
     *   Automatically registers the auxiliary sensor as an independent, virtual tracker on the PC side (SlimeVR Server).
     *   Implements separation and spoofing of linked data (battery level, signal strength, MAC address, etc.) for both main and auxiliary sensors.
-*   **Forced Online Recovery for Unstable Connections**
-    *   Resolves an issue where a tracker is recognized as "Offline" by the server despite successfully sending data.
-    *   Added logic to forcefully restore the "Online" state as soon as incoming data is detected.
+*   ~~Forced Online Recovery for Unstable Connections~~
+    * ~~* Resolves an issue where a tracker is recognized as "Offline" by the server despite successfully sending data.~~
+    *  ~~* Added logic to forcefully restore the "Online" state as soon as incoming data is detected.~~
+    Improved Connection Stability and Fix for False Disconnection Bug
+
+    The "forced recovery logic" mentioned above was removed as it induced a UI flickering issue (repeated disconnects and reconnects).
+
+    Identified and fixed a bug caused by a race condition due to the ESP32's multi-core (asynchronous) processing. The conflict between the packet reception time and the evaluation time caused a "time underflow," resulting in a massive elapsed time value that triggered false disconnections.
+
 *   **Support for 8MB Flash Development Boards**
     *   Added build configurations for boards equipped with 8MB flash memory. Please refer to the commented-out sections in `platformio.ini` for details.
 *   **Dongle-to-Tracker Pairing Memory**
