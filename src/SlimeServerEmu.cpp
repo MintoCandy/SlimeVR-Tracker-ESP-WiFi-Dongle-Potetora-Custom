@@ -423,20 +423,27 @@ void SlimeServerEmu::onPacket(AsyncUDPPacket &pkt) {
 }
 
 void SlimeServerEmu::update() {
-	uint32_t now = millis();
-	for (size_t i = 0; i < kMaxTrackers; i++) {
-		Peer &p = m_peers[i];
-		if (!p.used) continue;
+    uint32_t now = millis();
+    for (size_t i = 0; i < kMaxTrackers; i++) {
+        Peer &p = m_peers[i];
+        if (!p.used) continue;
 
-		if (kEnableHeartbeat && now - p.lastHeartbeatMs >= kHeartbeatIntervalMs) {
-			p.lastHeartbeatMs = now;
-			sendHeartbeat(p);
-		}
-		//timeoutのアンダーフロー防止のため変更
-		if (p.connected && (now >= p.lastSeenMs) && (now - p.lastSeenMs >= kTrackerTimeoutMs)) {
-			p.connected = false;
-			Serial.printf("[Emu] tracker id=%u timed out -> disconnected\n", p.trackerId);
-			PacketHandling::getInstance().setTrackerOnline(p.trackerId, false);
-		}
-	}
+		// 時間比較用 int32_t 有號解讀:onPacket(lwip task)可能在本函式取完 now 之後
+        // 才寫入 lastSeenMs/lastHeartbeatMs(值比 now 新)。若用 unsigned 減法會下溢成
+        // 巨大正數 → 剛收到封包的追蹤器被瞬間誤判逾時。有號解讀時「未來」為負數,不誤觸發。
+
+        // オーバーフロー対策　（白猫様からの情報で再度書き換えました。感謝いたします。）
+        if (kEnableHeartbeat
+            && static_cast<int32_t>(now - p.lastHeartbeatMs) >= static_cast<int32_t>(kHeartbeatIntervalMs)) {
+            p.lastHeartbeatMs = now;
+            sendHeartbeat(p);
+        }
+
+        if (p.connected
+            && static_cast<int32_t>(now - p.lastSeenMs) >= static_cast<int32_t>(kTrackerTimeoutMs)) {
+            p.connected = false;
+            Serial.printf("[Emu] tracker id=%u timed out -> disconnected\n", p.trackerId);
+            PacketHandling::getInstance().setTrackerOnline(p.trackerId, false);
+        }
+    }
 }
