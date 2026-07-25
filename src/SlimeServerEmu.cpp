@@ -432,7 +432,7 @@ void SlimeServerEmu::update() {
         // 才寫入 lastSeenMs/lastHeartbeatMs(值比 now 新)。若用 unsigned 減法會下溢成
         // 巨大正數 → 剛收到封包的追蹤器被瞬間誤判逾時。有號解讀時「未來」為負數,不誤觸發。
 
-        // オーバーフロー対策　（白猫様からの情報で再度書き換えました。感謝いたします。）
+        // アンダーフロー対策　（白猫様からの情報で再度書き換えました。感謝いたします。）
         if (kEnableHeartbeat
             && static_cast<int32_t>(now - p.lastHeartbeatMs) >= static_cast<int32_t>(kHeartbeatIntervalMs)) {
             p.lastHeartbeatMs = now;
