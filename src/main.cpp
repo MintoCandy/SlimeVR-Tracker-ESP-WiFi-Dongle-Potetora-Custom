@@ -15,11 +15,30 @@
 #include <USB.h>
 #include <USBCDC.h>
 
+#include <Preferences.h> //WebConfig用
+#include "WebUI.h"
+
 #ifdef USE_OFFICIAL_PROXY
   #include "SlimeServerEmu.h"
 #else
   #include "WifiCommunication.h"
 #endif
+
+String currentSsid;
+String currentPassword;
+
+void loadWiFiSettings() {
+    Preferences prefs;
+    prefs.begin("wifi_config", true); // 読み込み専用モードで開く
+    
+    // Preferencesに保存されていなければ、WifiDongleConfig.h の値をデフォルトとして使う
+    currentSsid = prefs.getString("ssid", WifiDongleConfig::apSsid);
+    currentPassword = prefs.getString("password", WifiDongleConfig::apPassword);
+    
+    prefs.end();
+    
+    Serial.printf("[WiFi] Loaded SSID: %s\n", currentSsid.c_str());
+}
 
 HIDDevice hidDevice;
 Button &button = Button::getInstance();
@@ -71,9 +90,13 @@ void setup() {
     led.begin();
     led.setState(false);
 
+    //Wi-Fiを起動する直前で、設定を読み込む
+    loadWiFiSettings();
+
+    //WifiDongleConfig の固定値ではなく、読み込んだ変数を使うように変更
     ErrorCodes result = comm.begin(
-        WifiDongleConfig::apSsid,
-        WifiDongleConfig::apPassword,
+        currentSsid.c_str(),           // 変更箇所
+        currentPassword.c_str(),       // 変更箇所
         WifiDongleConfig::apChannel,
         WifiDongleConfig::maxTrackers,
         WifiDongleConfig::apHidden
@@ -81,6 +104,9 @@ void setup() {
     if (result != ErrorCodes::NO_ERROR) {
         fail(result);
     }
+
+    //Wi-Fiが正常に立ち上がったら、裏側でWebUIを起動する
+    setupWebServer();
 
 #ifndef USE_OFFICIAL_PROXY
     comm.onTrackerPaired([&]() {
