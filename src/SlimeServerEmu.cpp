@@ -403,7 +403,7 @@ void SlimeServerEmu::onPacket(AsyncUDPPacket &pkt) {
                       p.port, 
                       pkt.remotePort());
                       
-        p.port = pkt.remotePort(); // 新しいポートで上書き
+        p.port = pkt.remotePort(); // 新しいポートで上書き(おそらく不要だが念のため)
     }
 	
 	if (!p.connected) {
