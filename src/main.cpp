@@ -31,9 +31,18 @@ void loadWiFiSettings() {
     Preferences prefs;
     prefs.begin("wifi_config", true); // 読み込み専用モードで開く
     
-    // Preferencesに保存されていなければ、WifiDongleConfig.h の値をデフォルトとして使う
-    currentSsid = prefs.getString("ssid", WifiDongleConfig::apSsid);
-    currentPassword = prefs.getString("password", WifiDongleConfig::apPassword);
+    // キーが存在するか確認してから読み込むことで、システムエラーログを回避
+    if (prefs.isKey("ssid")) {
+        currentSsid = prefs.getString("ssid");
+    } else {
+        currentSsid = WifiDongleConfig::apSsid;
+    }
+
+    if (prefs.isKey("password")) {
+        currentPassword = prefs.getString("password");
+    } else {
+        currentPassword = WifiDongleConfig::apPassword;
+    }
     
     prefs.end();
     
@@ -81,8 +90,27 @@ void setup() {
     button.onMultiPress([](size_t pressCount) {
         if (pressCount == 5) {
             Serial.println("Trackers reset");
-            Configuration::getInstance().resetTrackers();
+            Configuration::getInstance().resetTrackers(); // 既存のリセット
+            Preferences prefs; 
+            prefs.begin("slime_pairs", false);//"slime_pairs" のペアリング情報も消去
+            prefs.clear();
+            prefs.end();
+            Serial.println("Custom tracker pairings cleared");
+
             led.sendBlinks(5, 0.2f, 0.1f);
+            return;
+        }
+        if (pressCount == 7) {
+            Serial.println("[Reset] Executing Factory Reset by 7 clicks!");
+            Preferences prefs;
+            prefs.begin("wifi_config", false);
+            prefs.clear(); 
+            prefs.end();
+            
+            // LEDを点滅させる
+            led.sendBlinks(10, 0.1f, 0.1f);
+            delay(1000); 
+            ESP.restart(); // リセット完了後、自動的に再起動
             return;
         }
     });
