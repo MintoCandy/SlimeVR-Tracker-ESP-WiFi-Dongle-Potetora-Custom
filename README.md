@@ -6,6 +6,7 @@
 このファームウェアは、白猫（Xユーザー名：[@NekodaKohaku](https://x.com/NekodaKohaku)）様が公開されている「[SlimeVR-Tracker-ESP-WiFi-Dongle](https://github.com/NekodaKohaku/SlimeVR-Tracker-ESP-WiFi-Dongle)」をベースに、日本国内のBOOTHで販売されているVRトラッカー「[ぽてとら](https://potesuto.booth.pm/items/5945821)」向けにカスタムを行ったハードフォーク版です。
 
 動作確認は「ぽてとら2(強化版)」「ぽてとら2（通常版）」「ぽてとらAdd」「ぽてとらEL」「ぽてとらEL+」が確認済みです。
+検証機をご提供くださいました、ぽてとら作者のぐっちー様、改めて感謝いたします。
 使用した開発ボードはAmazonなどで販売されている「Freenove ESP32-S3 ESP32 S3 Board Lite」になります。
 
 基本的な使い方や環境構築などについては、本家様の説明文（当README下部）をご確認の上、ご自身の環境に合わせて調整してください。
@@ -47,36 +48,45 @@
 ---
 
 ### 🇬🇧 English
-This firmware is a customized hard fork of the "[SlimeVR-Tracker-ESP-WiFi-Dongle](https://github.com/NekodaKohaku/SlimeVR-Tracker-ESP-WiFi-Dongle)" originally published by Shironeko (X/Twitter: [@NekodaKohaku](https://x.com/NekodaKohaku)). It has been specifically modified for use with the VR tracker "[Potetora 2 (Enhanced Version)](https://potesuto.booth.pm/items/5945821)" sold on BOOTH in Japan.
+This firmware is a customized hard fork of the "[SlimeVR-Tracker-ESP-WiFi-Dongle](https://github.com/NekodaKohaku/SlimeVR-Tracker-ESP-WiFi-Dongle)" originally published by Shironeko (X/Twitter: [@NekodaKohaku](https://x.com/NekodaKohaku)). It has been specifically modified for use with the VR tracker "[Potetora](https://potesuto.booth.pm/items/5945821)" sold on BOOTH in Japan.
 
-Operation has been verified specifically with Potetora 2 (Enhanced Version). It has not been tested with other models, including the original Potetora (standard version), so compatibility with them is unknown.
+Operation has been verified with "Potetora 2 (Enhanced Version)", "Potetora 2 (Standard Version)", "Potetora Add", "Potetora EL", and "Potetora EL+".
+Special thanks to Gucchi, the creator of Potetora, for providing the testing units. 
+The development board used is the "Freenove ESP32-S3 ESP32 S3 Board Lite", which is available on Amazon and other retailers.
 
 For basic usage and setup instructions, please refer to the original author's description at the bottom of this README and adjust according to your environment.
 
 > **Acknowledgements**
 > I would like to express my sincere gratitude to Shironeko for publishing such an excellent open-source project, as well as to the developers of the various libraries used.
-> (*Note: The AI assistant "Gemini" was used in the development and modification of this custom firmware.*)
+> (*Note: The AI assistant "Gemini 3.1 Pro" was used in the development and modification of this custom firmware.*)
 
-#### 🛠️ Key Customizations (Changelog)
+#### 🛠️ Key Customizations
 *   **Support for Auxiliary (Extended) Sensors**
     *   Extracts auxiliary sensor data based on the Sensor ID.
     *   Automatically registers the auxiliary sensor as an independent, virtual tracker on the PC side (SlimeVR Server).
-    *   Implements separation and spoofing of linked data (battery level, signal strength, MAC address, etc.) for both main and auxiliary sensors.
-*   ~~Forced Online Recovery for Unstable Connections~~
-    * ~~* Resolves an issue where a tracker is recognized as "Offline" by the server despite successfully sending data.~~
-    *  ~~* Added logic to forcefully restore the "Online" state as soon as incoming data is detected.~~
-    Improved Connection Stability and Fix for False Disconnection Bug
+    *   Implements synchronization and ID/MAC address spoofing for linked data (battery level, signal strength, etc.) between main and auxiliary sensors.
 
-    The "forced recovery logic" mentioned above was removed as it induced a UI flickering issue (repeated disconnects and reconnects).
+*   ~~**Forced Online Recovery for Unstable Connections**~~
+    *   ~~Resolves an issue where a tracker is recognized as "Offline" by the server despite successfully sending data.~~
+    *   ~~Added logic to forcefully restore the "Online" state as soon as incoming data is detected.~~
 
-    Identified and fixed a bug caused by a race condition due to the ESP32's multi-core (asynchronous) processing. The conflict between the packet reception time and the evaluation time caused a "time underflow," resulting in a massive elapsed time value that triggered false disconnections.
+*   **Improved Connection Stability and False Disconnection Bug Fix**
+    *   The "forced recovery logic" mentioned above was removed as it induced a UI flickering issue (repeated disconnects and reconnects).
+    *   Identified and fixed a bug caused by a race condition due to the ESP32's multi-core (asynchronous) processing. The conflict between the packet reception time and the evaluation time caused a "time underflow," resulting in a massive elapsed time value that triggered false disconnections.
 
 *   **Support for 8MB Flash Development Boards**
     *   Added build configurations for boards equipped with 8MB flash memory. Please refer to the commented-out sections in `platformio.ini` for details.
+
 *   **Dongle-to-Tracker Pairing Memory**
     *   Memorizes the binding between a successfully connected tracker and the virtual ID sent to the PC.
     *   Prevents tracker assignment (sensor numbering) mismatches during reboots or reconnections.
----
+
+*   **WebUI for SSID and Password Configuration**
+    *   Added WebUI access (192.168.4.1) allowing users to easily modify Wi-Fi SSID and password settings.
+    *   Implemented a factory reset feature (triggered by 7 consecutive clicks of the BOOT button) to restore default Wi-Fi settings in case of typos or forgotten passwords.
+    
+*   **Tracker Pairing Reset Adjustment**
+    *   Adjusted the existing 5-click BOOT button reset function to also clear the newly added custom tracker pairing memory simultaneously.
 
 （以下、本家様の説明文 / Original description follows below）
 
