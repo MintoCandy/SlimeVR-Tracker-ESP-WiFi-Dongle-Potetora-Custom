@@ -1,11 +1,11 @@
 # SlimeVR ESP Tracker WiFi Dongle ぽてとらカスタムファーム / Potetora Custom Firmware
 
-**2026年7月24日 追記 / Added on July 24, 2026**
+**2026年7月27日 追記 / Added on July 24, 2026**
 
 ### 🇯🇵 日本語 (Japanese)
-このファームウェアは、白猫（Xユーザー名：[@NekodaKohaku](https://x.com/NekodaKohaku)）様が公開されている「[SlimeVR-Tracker-ESP-WiFi-Dongle](https://github.com/NekodaKohaku/SlimeVR-Tracker-ESP-WiFi-Dongle)」をベースに、日本国内のBOOTHで販売されているVRトラッカー「[ぽてとら2(強化版)](https://potesuto.booth.pm/items/5945821)」向けにカスタムを行ったハードフォーク版です。
+このファームウェアは、白猫（Xユーザー名：[@NekodaKohaku](https://x.com/NekodaKohaku)）様が公開されている「[SlimeVR-Tracker-ESP-WiFi-Dongle](https://github.com/NekodaKohaku/SlimeVR-Tracker-ESP-WiFi-Dongle)」をベースに、日本国内のBOOTHで販売されているVRトラッカー「[ぽてとら](https://potesuto.booth.pm/items/5945821)」向けにカスタムを行ったハードフォーク版です。
 
-動作確認はぽてとら2(強化版)で行っています。ぽてとら（無印）含むほかのラインナップでは確認していないため動作するかは不明です。
+動作確認は「ぽてとら2(強化版)」「ぽてとら2（通常版）」「ぽてとらAdd」「ぽてとらEL」「ぽてとらEL+」が確認済みです。
 使用した開発ボードはAmazonなどで販売されている「Freenove ESP32-S3 ESP32 S3 Board Lite」になります。
 
 基本的な使い方や環境構築などについては、本家様の説明文（当README下部）をご確認の上、ご自身の環境に合わせて調整してください。
