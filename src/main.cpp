@@ -31,7 +31,6 @@ void loadWiFiSettings() {
     Preferences prefs;
     prefs.begin("wifi_config", true); // 読み込み専用モードで開く
     
-    // キーが存在するか確認してから読み込むことで、システムエラーログを回避
     if (prefs.isKey("ssid")) {
         currentSsid = prefs.getString("ssid");
     } else {
