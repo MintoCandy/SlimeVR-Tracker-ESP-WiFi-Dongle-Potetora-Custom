@@ -29,7 +29,7 @@ const char index_html[] PROGMEM = R"rawliteral(
       SSID:<br>
       <input type="text" name="ssid" value="%CURRENT_SSID%" autocomplete="off"><br>
       Password:<br>
-      <input type="password" name="pass" value="%CURRENT_PASS%" autocomplete="off"><br>
+      <input type="password" name="pass" value="%CURRENT_PASS%" autocomplete="off" minlength="8" placeholder="8文字以上"><br>
       <input type="submit" value="Save & Restart">
     </form>
   </div>
@@ -54,6 +54,11 @@ void setupWebServer() {
         
         if (request->hasParam("ssid", true)) newSsid = request->getParam("ssid", true)->value();
         if (request->hasParam("pass", true)) newPass = request->getParam("pass", true)->value();
+
+        if (newPass.length() > 0 && newPass.length() < 8) {
+            request->send(400, "text/html", "<body style='background-color:#121212; color:#ff4c4c; text-align:center; padding-top:20vh; font-family:sans-serif;'><h2>Error: Password must be at least 8 characters.</h2><p>パスワードは8文字以上で入力してください。</p><br><a href='/' style='color:#00ADB5; text-decoration:none; font-size:18px;'>← 戻る (Go Back)</a></body>");
+            return; 
+        }
         
         Preferences prefs;
         prefs.begin("wifi_config", false);
