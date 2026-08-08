@@ -1,6 +1,7 @@
 # SlimeVR ESP Tracker WiFi Dongle ぽてとらカスタムファーム / Potetora Custom Firmware
 
 **2026年7月27日 追記 / Added on July 24, 2026**
+変更：MintoCandy
 
 ### 🇯🇵 日本語 (Japanese)
 このファームウェアは、白猫（Xユーザー名：[@NekodaKohaku](https://x.com/NekodaKohaku)）様が公開されている「[SlimeVR-Tracker-ESP-WiFi-Dongle](https://github.com/NekodaKohaku/SlimeVR-Tracker-ESP-WiFi-Dongle)」をベースに、日本国内のBOOTHで販売されているVRトラッカー「[ぽてとら](https://potesuto.booth.pm/items/5945821)」向けにカスタムを行ったハードフォーク版です。
